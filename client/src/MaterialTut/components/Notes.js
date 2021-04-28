@@ -1,11 +1,29 @@
-import { Container } from "@material-ui/core";
+import { Container, makeStyles, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import NoteCard from "./NoteCard";
 import Masonry from "react-masonry-css";
 import axios from "axios";
 import Skeleton from "react-loading-skeleton";
 
+const useStyles = makeStyles({
+  svg: {
+    width: 128,
+    color: "#ddd",
+  },
+  no_notes: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    height: "calc(100vh - 112px)",
+    justifyContent: "center",
+  },
+  skeleton: {
+    margin: 10,
+  },
+});
+
 export default function Notes() {
+  const classes = useStyles();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState([1, 2, 3, 4, 5, 6]);
 
@@ -28,8 +46,10 @@ export default function Notes() {
         method: "get",
         url: `http://localhost:8000/notes/`,
       }).then((res) => {
-        setNotes(res.data);
         setLoading([]);
+        if (res.data.length !== 0) {
+          setNotes(res.data);
+        }
       });
     } catch (error) {
       console.log(error);
@@ -44,22 +64,44 @@ export default function Notes() {
 
   return (
     <Container>
-      <Masonry
-        breakpointCols={breakpoints}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
-      >
-        {loading.map((e) => (
-          <div key={e}>
-            <Skeleton height={200} />
-          </div>
-        ))}
-        {notes.map((note) => (
-          <div key={note._id}>
-            <NoteCard note={note} deleteHandler={deleteHandler} />
-          </div>
-        ))}
-      </Masonry>
+      {notes.length !== 0 || loading.length !== 0 ? (
+        <Masonry
+          breakpointCols={breakpoints}
+          className="my-masonry-grid"
+          columnClassName="my-masonry-grid_column"
+        >
+          {loading.map((e) => (
+            <div key={e}>
+              <Skeleton height={200} />
+            </div>
+          ))}
+          {notes.map((note) => (
+            <div key={note._id}>
+              <NoteCard note={note} deleteHandler={deleteHandler} />
+            </div>
+          ))}
+        </Masonry>
+      ) : (
+        <div className={classes.no_notes}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={classes.svg}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+            />
+          </svg>
+          <Typography variant="h5" color="textSecondary">
+            Notes you add appear here
+          </Typography>
+        </div>
+      )}
     </Container>
   );
 }

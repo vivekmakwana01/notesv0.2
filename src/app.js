@@ -36,7 +36,7 @@ app.delete("/notes/:id", async (req, res) => {
 });
 
 app.post("/notes", async (req, res) => {
-  console.log(req)
+  console.log(req);
   const note = new Note(req.body);
   try {
     await note.save();
