@@ -1,4 +1,4 @@
-import { Container, makeStyles, Typography } from "@material-ui/core";
+import { Container, Grid, makeStyles, Typography } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import NoteCard from "./NoteCard";
 import Masonry from "react-masonry-css";
@@ -14,18 +14,23 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    height: "calc(100vh - 112px)",
     justifyContent: "center",
+    height: "100%",
   },
   skeleton: {
     margin: 10,
+  },
+  container: {
+    maxWidth: 1200,
+    height: "calc(100vh - 112px)",
+    overflow: 'auto'
   },
 });
 
 export default function Notes() {
   const classes = useStyles();
   const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState([1, 2, 3, 4, 5, 6]);
+  const [loading, setLoading] = useState(true);
 
   const deleteHandler = async (_id) => {
     try {
@@ -46,7 +51,7 @@ export default function Notes() {
         method: "get",
         url: `http://localhost:8000/notes/`,
       }).then((res) => {
-        setLoading([]);
+        setLoading(false);
         if (res.data.length !== 0) {
           setNotes(res.data);
         }
@@ -63,18 +68,25 @@ export default function Notes() {
   };
 
   return (
-    <Container>
-      {notes.length !== 0 || loading.length !== 0 ? (
+    <Container className={classes.container}>
+      {loading ? (
+        <Grid container spacing={5} justify="space-between">
+          <Grid item xs={12} sm={6} md={4} >
+            <Skeleton height={200} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} >
+            <Skeleton height={200} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4} >
+            <Skeleton height={200} />
+          </Grid>
+        </Grid>
+      ) : notes.length !== 0 ? (
         <Masonry
           breakpointCols={breakpoints}
           className="my-masonry-grid"
           columnClassName="my-masonry-grid_column"
         >
-          {loading.map((e) => (
-            <div key={e}>
-              <Skeleton height={200} />
-            </div>
-          ))}
           {notes.map((note) => (
             <div key={note._id}>
               <NoteCard note={note} deleteHandler={deleteHandler} />

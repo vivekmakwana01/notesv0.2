@@ -1,6 +1,7 @@
 import {
   AppBar,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -11,8 +12,9 @@ import {
 } from "@material-ui/core";
 import { AddCircleOutlined, SubjectOutlined } from "@material-ui/icons";
 import { format } from "date-fns/esm";
-import React from "react";
+import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router";
+import MenuIcon from "@material-ui/icons/Menu";
 
 const drawerWidth = 240;
 
@@ -38,13 +40,10 @@ const useStyles = makeStyles((theme) => {
     title: {
       padding: theme.spacing(2),
     },
-    appbar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-    },
     toolbar: theme.mixins.toolbar,
     date: {
-      flexGrow: 1
-    }
+      flexGrow: 1,
+    },
   };
 });
 
@@ -52,6 +51,8 @@ export default function Layout({ children }) {
   const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
+
+  const [open, setOpen] = useState(false);
 
   const menuItems = [
     {
@@ -71,7 +72,17 @@ export default function Layout({ children }) {
       {/* appbar */}
       <AppBar className={classes.appbar} color="default" elevation={0}>
         <Toolbar>
-          <Typography className={classes.date}>Today is the { format( new Date(), 'do MMMM Y') }</Typography>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={() => setOpen(true)}
+            edge="start"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography className={classes.date}>
+            Today is the {format(new Date(), "do MMMM Y")}
+          </Typography>
           <Typography>Lucifer</Typography>
         </Toolbar>
       </AppBar>
@@ -79,9 +90,10 @@ export default function Layout({ children }) {
       {/* side drawer */}
       <Drawer
         className={classes.drawer}
-        variant="permanent"
+        open={open}
         anchor="left"
         classes={{ paper: classes.drawerPaper }}
+        onClose={() => setOpen(false)}
       >
         <div>
           <Typography variant="h5" className={classes.title}>
@@ -95,7 +107,10 @@ export default function Layout({ children }) {
             <ListItem
               button
               key={item.text}
-              onClick={() => history.push(item.path)}
+              onClick={() => {
+                setOpen(false);
+                history.push(item.path);
+              }}
               className={
                 location.pathname === item.path ? classes.active : null
               }
